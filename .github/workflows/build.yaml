@@ -68,8 +68,8 @@ jobs:
       uses: softprops/action-gh-release@v1
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      if: github.ref_type == 'tag'
       with:
-        tag_name: ${{ github.ref }}
         files: |
           dist/windows-x64/nbtv.exe
           dist/linux-x64/nbtv
