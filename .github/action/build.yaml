@@ -1,0 +1,86 @@
+name: Build Release Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install MinGW
+      run: |
+        choco install mingw -y
+        refreshenv
+    
+    - name: Build
+      run: |
+        gcc -Wall -Wextra -O3 -o nbtv.exe worker.c -lcurl -lcjson -lws2_32
+        .\nbtv.exe --version
+    
+    - uses: actions/upload-artifact@v4
+      with:
+        name: windows-x64
+        path: nbtv.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc libcurl4-openssl-dev libcjson-dev
+    
+    - name: Build
+      run: |
+        gcc -Wall -Wextra -O3 -static -o nbtv worker.c -lcurl -lcjson -lpthread
+        ./nbtv --version
+    
+    - uses: actions/upload-artifact@v4
+      with:
+        name: linux-x64
+        path: nbtv
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        brew install curl cjson
+    
+    - name: Build
+      run: |
+        clang -Wall -Wextra -O3 -o nbtv worker.c -lcurl -lcjson
+        ./nbtv --version
+    
+    - uses: actions/upload-artifact@v4
+      with:
+        name: macos-x64
+        path: nbtv
+
+  release:
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        path: dist
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref }}
+        files: |
+          dist/windows-x64/nbtv.exe
+          dist/linux-x64/nbtv
+          dist/macos-x64/nbtv
