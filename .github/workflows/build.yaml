@@ -19,7 +19,7 @@ jobs:
     
     - name: Build
       run: |
-        gcc -Wall -Wextra -O3 -o nbtv.exe worker.c -lcurl -lcjson -lws2_32
+        make
         .\nbtv.exe --version
     
     - uses: actions/upload-artifact@v4
@@ -39,7 +39,7 @@ jobs:
     
     - name: Build
       run: |
-        gcc -Wall -Wextra -O3 -static -o nbtv worker.c -lcurl -lcjson -lpthread
+        make
         ./nbtv --version
     
     - uses: actions/upload-artifact@v4
@@ -58,7 +58,7 @@ jobs:
     
     - name: Build
       run: |
-        clang -Wall -Wextra -O3 -o nbtv worker.c -lcurl -lcjson
+        make
         ./nbtv --version
     
     - uses: actions/upload-artifact@v4
