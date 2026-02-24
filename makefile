@@ -8,6 +8,8 @@ BASE_LDFLAGS = -lcurl -lcjson
 # Windows平台
 ifeq ($(OS), Windows_NT)
     LDFLAGS = $(BASE_LDFLAGS) -lws2_32
+else
+	LDFLAGS = $(BASE_LDFLAGS)
 endif
 
 # 目标可执行文件
