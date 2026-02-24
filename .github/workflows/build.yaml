@@ -12,10 +12,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install MinGW
+    - name: Install dependencies
       run: |
-        choco install mingw -y
-        refreshenv
+        choco install msys2 -y
+        C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
+        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-toolchain
+        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-curl
+        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-cjson
+        echo "C:\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
     
     - name: Build
       run: |
