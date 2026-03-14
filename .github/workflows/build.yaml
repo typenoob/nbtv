@@ -32,9 +32,10 @@ jobs:
         sudo apt-get install -y gcc libcurl4-openssl-dev
         wget -q https://archive.openwrt.org/chaos_calmer/15.05.1/ramips/mt7621/OpenWrt-SDK-15.05.1-ramips-mt7621_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
         tar -xjf OpenWrt-SDK-*.tar.bz2
-        mv OpenWrt-SDK-* openwrt-sdk
-        export TOOLCHAIN=$(pwd)/openwrt-sdk/staging_dir/toolchain-mipsel_1004kc+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin
+        cd OpenWrt-SDK-*
+        export TOOLCHAIN=$(pwd)/staging_dir/toolchain-mipsel_1004kc+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin
         export PATH=$TOOLCHAIN:$PATH
+        cd ..
         git clone https://github.com/DaveGamble/cJSON.git
         cd cJSON && make CC=mipsel-openwrt-linux-gcc && cd ..
         git clone https://github.com/curl/curl.git
