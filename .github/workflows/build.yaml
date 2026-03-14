@@ -3,112 +3,115 @@ name: Build Release Binaries
 permissions:
   contents: write
 
-on:
-  push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
+  on:
+    push:
+        tags:
+              - 'v*'
+                workflow_dispatch:
 
-jobs:
-  build-windows:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install dependencies
-      run: |
-        choco install msys2 -y
-        C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
-        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-toolchain
-        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-curl
-        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-cjson
-        echo "C:\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-    
-    - name: Build
-      run: |
-        make
-        .\nbtv.exe --version
-    
-    - uses: actions/upload-artifact@v4
-      with:
-        name: windows-x64
-        path: nbtv.exe
+                jobs:
+                  build-windows:
+                      runs-on: windows-latest
+                          steps:
+                              - uses: actions/checkout@v4
+                                  
+                                      - name: Install dependencies
+                                            run: |
+                                                    choco install msys2 -y
+                                                            C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
+                                                                    C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-toolchain
+                                                                            C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-curl
+                                                                                    C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-cjson
+                                                                                            echo "C:\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+                                                                                                
+                                                                                                    - name: Build
+                                                                                                          run: |
+                                                                                                                  make
+                                                                                                                          .\nbtv.exe --version
+                                                                                                                              
+                                                                                                                                  - uses: actions/upload-artifact@v4
+                                                                                                                                        with:
+                                                                                                                                                name: windows-x64
+                                                                                                                                                        path: nbtv.exe
 
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gcc libcurl4-openssl-dev libcjson-dev
-    
-    - name: Build
-      run: |
-        make
-        ./nbtv --version
-    
-    - uses: actions/upload-artifact@v4
-      with:
-        name: linux-x64
-        path: nbtv
+                                                                                                                                                          build-linux:
+                                                                                                                                                              runs-on: ubuntu-latest
+                                                                                                                                                                  steps:
+                                                                                                                                                                      - uses: actions/checkout@v4
+                                                                                                                                                                          
+                                                                                                                                                                              - name: Install dependencies
+                                                                                                                                                                                    run: |
+                                                                                                                                                                                            sudo apt-get update
+                                                                                                                                                                                                    sudo apt-get install -y gcc libcurl4-openssl-dev libcjson-dev
+                                                                                                                                                                                                        
+                                                                                                                                                                                                            - name: Build
+                                                                                                                                                                                                                  run: |
+                                                                                                                                                                                                                          make
+                                                                                                                                                                                                                                  ./nbtv --version
+                                                                                                                                                                                                                                      
+                                                                                                                                                                                                                                          - uses: actions/upload-artifact@v4
+                                                                                                                                                                                                                                                with:
+                                                                                                                                                                                                                                                        name: linux-x64
+                                                                                                                                                                                                                                                                path: nbtv
 
-  # 👇 这是我新加的：Linux ARM 32/64 编译（armhf + aarch64）
-  build-linux-arm:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
+                                                                                                                                                                                                                                                                  build-linux-arm:
+                                                                                                                                                                                                                                                                      runs-on: ubuntu-latest
+                                                                                                                                                                                                                                                                          steps:
+                                                                                                                                                                                                                                                                              - uses: actions/checkout@v4
 
-    - name: Install ARM cross compiler & dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          gcc-arm-linux-gnueabihf \
-          gcc-aarch64-linux-gnu \
-          libcurl4-openssl-dev \
-          libcjson-dev
+                                                                                                                                                                                                                                                                                  - name: Add ARM arch and install cross tools & libraries
+                                                                                                                                                                                                                                                                                        run: |
+                                                                                                                                                                                                                                                                                                sudo dpkg --add-architecture arm64
+                                                                                                                                                                                                                                                                                                        sudo dpkg --add-architecture armhf
+                                                                                                                                                                                                                                                                                                                sudo apt-get update
+                                                                                                                                                                                                                                                                                                                        sudo apt-get install -y \
+                                                                                                                                                                                                                                                                                                                                  gcc-aarch64-linux-gnu \
+                                                                                                                                                                                                                                                                                                                                            gcc-arm-linux-gnueabihf \
+                                                                                                                                                                                                                                                                                                                                                      libcurl4-openssl-dev:arm64 \
+                                                                                                                                                                                                                                                                                                                                                                libcjson-dev:arm64 \
+                                                                                                                                                                                                                                                                                                                                                                          libcurl4-openssl-dev:armhf \
+                                                                                                                                                                                                                                                                                                                                                                                    libcjson-dev:armhf
 
-    # 编译 ARM64 (aarch64)：树莓派3/4/5、现代 OpenWrt
-    - name: Build Linux ARM64 (aarch64)
-      run: |
-        make CC=aarch64-linux-gnu-gcc
-        mv nbtv nbtv-arm64
-        file nbtv-arm64
+                                                                                                                                                                                                                                                                                                                                                                                        - name: Build for ARM64 (aarch64)
+                                                                                                                                                                                                                                                                                                                                                                                              run: |
+                                                                                                                                                                                                                                                                                                                                                                                                      make CC=aarch64-linux-gnu-gcc \
+                                                                                                                                                                                                                                                                                                                                                                                                                CFLAGS="$(pkg-config --cflags libcurl cjson)" \
+                                                                                                                                                                                                                                                                                                                                                                                                                          LDFLAGS="$(pkg-config --libs libcurl cjson)"
+                                                                                                                                                                                                                                                                                                                                                                                                                                  mv nbtv nbtv-arm64
 
-    # 编译 ARM32 (armhf)：老款树莓派、旧路由器
-    - name: Build Linux ARM32 (armhf)
-      run: |
-        make clean
-        make CC=arm-linux-gnueabihf-gcc
-        mv nbtv nbtv-arm32
-        file nbtv-arm32
+                                                                                                                                                                                                                                                                                                                                                                                                                                      - name: Build for ARM32 (armhf)
+                                                                                                                                                                                                                                                                                                                                                                                                                                            run: |
+                                                                                                                                                                                                                                                                                                                                                                                                                                                    make clean
+                                                                                                                                                                                                                                                                                                                                                                                                                                                            make CC=arm-linux-gnueabihf-gcc \
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                      CFLAGS="$(pkg-config --cflags libcurl cjson)" \
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                LDFLAGS="$(pkg-config --libs libcurl cjson)"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        mv nbtv nbtv-arm32
 
-    - uses: actions/upload-artifact@v4
-      with:
-        name: linux-arm
-        path: |
-          nbtv-arm32
-          nbtv-arm64
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            - uses: actions/upload-artifact@v4
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  with:
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          name: linux-arm
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  path: |
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            nbtv-arm32
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      nbtv-arm64
 
-  # 发布：同时上传 windows、x64、arm32、arm64
-  release:
-    needs: [build-windows, build-linux, build-linux-arm]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    
-    steps:
-    - uses: actions/download-artifact@v4
-      with:
-        path: dist
-    
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        files: |
-          dist/windows-x64/nbtv.exe
-          dist/linux-x64/nbtv
-          dist/linux-arm/nbtv-arm32
-          dist/linux-arm/nbtv-arm64
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        release:
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            needs: [build-windows, build-linux, build-linux-arm]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                runs-on: ubuntu-latest
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            steps:
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                - uses: actions/download-artifact@v4
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      with:
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              path: dist
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      - name: Create Release
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            uses: softprops/action-gh-release@v1
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  env:
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                with:
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        files: |
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  dist/windows-x64/nbtv.exe
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            dist/linux-x64/nbtv
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      dist/linux-arm/nbtv-arm32
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                dist/linux-arm/nbtv-arm64
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                update 
