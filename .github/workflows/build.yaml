@@ -26,17 +26,16 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc zlib1g-dev libcurl4-openssl-dev libcjson-dev
+        sudo apt-get install -y gcc-mipsel-linux-gnu zlib1g-dev libcurl4-openssl-dev libcjson-dev
     - name: Build (Static)
       run: |
-        sudo apt-get install -y gcc libcurl4-openssl-dev
         git clone https://github.com/DaveGamble/cJSON.git
-        cd cJSON && make && cd ..
+        cd cJSON && make CC=mipsel-linux-gnu-gcc && cd ..
         git clone https://github.com/curl/curl.git
         cd curl && autoreconf -fi
         ./configure --disable-shared --enable-static --without-ssl --without-libpsl --without-librtmp --without-zstd --without-brotli
-        make -j$(nproc) && cd ..
-        make LDFLAGS="-static curl/lib/.libs/libcurl.a cJSON/libcjson.a -lz" CFLAGS="-IcJSON -Icurl/include-static"
+        make CC=mipsel-linux-gnu-gcc -j$(nproc) && cd ..
+        make CC=mipsel-linux-gnu-gcc LDFLAGS="-static curl/lib/.libs/libcurl.a cJSON/libcjson.a -lz" CFLAGS="-IcJSON -Icurl/include-static"
         ./nbtv --version 
     - uses: actions/upload-artifact@v4
       with:
