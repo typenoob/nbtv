@@ -33,5 +33,5 @@ jobs:
         ./nbtv --version
     - uses: actions/upload-artifact@v4
       with:
-        name: linux-x64
+        name: linux-x64-${{ matrix.arch }}
         path: nbtv
