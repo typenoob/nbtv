@@ -47,3 +47,4 @@ jobs:
       with:
         name: linux-x64-${{ matrix.targets[0] }}
         path: nbtv
+        
