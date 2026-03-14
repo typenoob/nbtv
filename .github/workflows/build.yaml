@@ -36,9 +36,7 @@ jobs:
         export TOOLCHAIN=$(pwd)/staging_dir/toolchain-mipsel_1004kc+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin
         export PATH=$TOOLCHAIN:$PATH
         cd ..
-        git clone https://github.com/DaveGamble/cJSON.git
-        cd cJSON && make CC=mipsel-openwrt-linux-gcc && cd ..
-        make CC=mipsel-openwrt-linux-gcc LDFLAGS="-lcurl cJSON/libcjson.a -lz" CFLAGS="-IcJSON"
+        make CC=mipsel-openwrt-linux-gcc LDFLAGS="-lcurl -lcjson -lz"
     - uses: actions/upload-artifact@v4
       with:
         name: linux-x64-${{ matrix.targets[0] }}
