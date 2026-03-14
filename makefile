@@ -5,7 +5,7 @@ CC = gcc
 
 # 编译选项
 CFLAGS = -Wall -Wextra -O2
-BASE_LDFLAGS = -lcurl -lcjson
+BASE_LDFLAGS = -lcurl -lcjson -static
 LDLIBS += -lcurl -lcjson
 
 # Windows平台
