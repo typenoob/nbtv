@@ -32,7 +32,7 @@ jobs:
         wget -q https://archive.openwrt.org/releases/25.12.0/targets/ramips/mt7621/openwrt-toolchain-25.12.0-ramips-mt7621_gcc-14.3.0_musl.Linux-x86_64.tar.zst
         tar -I zstd -xf openwrt-*.tar.zst
         cd openwrt-toolchain-25.12.0-ramips-mt7621_gcc-14.3.0_musl.Linux-x86_64
-        export TOOLCHAIN=$(pwd)/bin
+        export TOOLCHAIN=$(pwd)/toolchain-mipsel_24kc_gcc-14.3.0_musl/bin
         export PATH=$TOOLCHAIN:$PATH
         cd ..
         git clone https://github.com/DaveGamble/cJSON.git
