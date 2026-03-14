@@ -30,13 +30,18 @@ jobs:
     - name: Build (Static)
       run: |
         sudo apt-get install -y gcc libcurl4-openssl-dev
+        wget https://archive.openwrt.org/chaos_calmer/15.05.1/ramips/mt7621/OpenWrt-SDK-15.05.1-ramips-mt7621_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+        tar -xjvf OpenWrt-SDK-*.tar.bz2
+        mv OpenWrt-SDK-* openwrt-sdk
+        export TOOLCHAIN=$(pwd)/openwrt-sdk/staging_dir/toolchain-mipsel_24kc_gcc-4.8-linaro_uClibc-0.9.33.2/bin
+        export PATH=$TOOLCHAIN:$PATH
         git clone https://github.com/DaveGamble/cJSON.git
-        cd cJSON && make && cd ..
+        cd cJSON && make CC=mipsel-openwrt-linux-gcc && cd ..
         git clone https://github.com/curl/curl.git
         cd curl && autoreconf -fi
         ./configure --disable-shared --enable-static --without-ssl --without-libpsl --without-librtmp --without-zstd --without-brotli
-        make -j$(nproc) && cd ..
-        make LDFLAGS="-static curl/lib/.libs/libcurl.a cJSON/libcjson.a -lz" CFLAGS="-IcJSON -Icurl/include-static"
+        make CC=mipsel-openwrt-linux-gcc -j$(nproc) && cd ..
+        make CC=mipsel-openwrt-linux-gcc LDFLAGS="-static curl/lib/.libs/libcurl.a cJSON/libcjson.a -lz" CFLAGS="-IcJSON -Icurl/include-static"
         ./nbtv --version 
     - uses: actions/upload-artifact@v4
       with:
