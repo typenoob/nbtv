@@ -6,6 +6,7 @@ CC = gcc
 # 编译选项
 CFLAGS = -Wall -Wextra -O2
 BASE_LDFLAGS = -lcurl -lcjson
+LDLIBS += -lcurl -lcjson
 
 # Windows平台
 ifeq ($(OS), Windows_NT)
