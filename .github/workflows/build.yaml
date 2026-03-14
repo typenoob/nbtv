@@ -6,33 +6,21 @@ on:
       - 'v*'
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  build-windows:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Install dependencies
-      run: |
-        choco install msys2 -y
-        C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
-        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-toolchain
-        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-curl
-        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-cjson
-        echo "C:\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-    - name: Build
-      run: |
-        make
-        .\nbtv.exe --version
-    - uses: actions/upload-artifact@v4
-      with:
-        name: windows-x64
-        path: nbtv.exe
-
-  build-linux:
+  # Building using the github runner environement directly.
+  make:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        targets: [
+          [mips32],
+          [mips32el],
+          [mips64],
+          [mips64el]
+        ]
+      fail-fast: false
+    env:
+      TARGET: ${{ matrix.targets[0] }}
     steps:
     - uses: actions/checkout@v4
     - name: Install dependencies
@@ -47,65 +35,3 @@ jobs:
       with:
         name: linux-x64
         path: nbtv
-
-  build-linux-arm:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Install cross compilers
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gcc-aarch64-linux-gnu gcc-arm-linux-gnueabihf
-    - name: Build ARM64
-      run: |
-        make CC=aarch64-linux-gnu-gcc CFLAGS="-static" LDFLAGS="-static -lcurl -lcjson"
-        mv nbtv nbtv-arm64
-    - name: Build ARM32
-      run: |
-        make clean
-        make CC=arm-linux-gnueabihf-gcc CFLAGS="-static" LDFLAGS="-static -lcurl -lcjson"
-        mv nbtv nbtv-arm32
-    - uses: actions/upload-artifact@v4
-      with:
-        name: linux-arm
-        path: |
-          nbtv-arm32
-          nbtv-arm64
-
-  # ====================== 你要的 mipsel_24kc ======================
-  build-linux-mipsel:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Install MIPS cross compiler
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gcc-mipsel-linux-gnu
-    - name: Build for mipsel_24kc
-      run: |
-        make CC=mipsel-linux-gnu-gcc CFLAGS="-static" LDFLAGS="-static -lcurl -lcjson"
-        mv nbtv nbtv-mipsel_24kc
-    - uses: actions/upload-artifact@v4
-      with:
-        name: linux-mipsel
-        path: nbtv-mipsel_24kc
-
-  # ====================== 发布 ======================
-  release:
-    needs: [build-windows, build-linux, build-linux-arm, build-linux-mipsel]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/download-artifact@v4
-      with:
-        path: dist
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      with:
-        files: |
-          dist/windows-x64/nbtv.exe
-          dist/linux-x64/nbtv
-          dist/linux-arm/nbtv-arm32
-          dist/linux-arm/nbtv-arm64
-          dist/linux-mipsel/nbtv-mipsel_24kc
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
