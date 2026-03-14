@@ -49,39 +49,63 @@ jobs:
         path: nbtv
 
   build-linux-arm:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Install dependencies
+    - name: Install cross compilers
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc libcurl4-openssl-dev libcjson-dev
-    - name: Build
+        sudo apt-get install -y gcc-aarch64-linux-gnu gcc-arm-linux-gnueabihf
+    - name: Build ARM64
       run: |
-        make
-        ./nbtv --version
+        make CC=aarch64-linux-gnu-gcc CFLAGS="-static" LDFLAGS="-static -lcurl -lcjson"
+        mv nbtv nbtv-arm64
+    - name: Build ARM32
+      run: |
+        make clean
+        make CC=arm-linux-gnueabihf-gcc CFLAGS="-static" LDFLAGS="-static -lcurl -lcjson"
+        mv nbtv nbtv-arm32
     - uses: actions/upload-artifact@v4
       with:
         name: linux-arm
-        path: nbtv
+        path: |
+          nbtv-arm32
+          nbtv-arm64
 
-  release:
-    needs: [build-windows, build-linux, build-linux-arm]
+  # ====================== 你要的 mipsel_24kc ======================
+  build-linux-mipsel:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    
     steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: dist
-    
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    with:
+    - uses: actions/checkout@v4
+    - name: Install MIPS cross compiler
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-mipsel-linux-gnu
+    - name: Build for mipsel_24kc
+      run: |
+        make CC=mipsel-linux-gnu-gcc CFLAGS="-static" LDFLAGS="-static -lcurl -lcjson"
+        mv nbtv nbtv-mipsel_24kc
+    - uses: actions/upload-artifact@v4
+      with:
+        name: linux-mipsel
+        path: nbtv-mipsel_24kc
+
+  # ====================== 发布 ======================
+  release:
+    needs: [build-windows, build-linux, build-linux-arm, build-linux-mipsel]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        path: dist
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
         files: |
           dist/windows-x64/nbtv.exe
           dist/linux-x64/nbtv
           dist/linux-arm/nbtv-arm32
           dist/linux-arm/nbtv-arm64
+          dist/linux-mipsel/nbtv-mipsel_24kc
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
