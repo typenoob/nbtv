@@ -29,16 +29,21 @@ jobs:
         sudo apt-get install -y gcc zlib1g-dev libcurl4-openssl-dev libcjson-dev
     - name: Build (Static)
       run: |
-        wget -q https://archive.openwrt.org/chaos_calmer/15.05.1/ramips/mt7621/OpenWrt-SDK-15.05.1-ramips-mt7621_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
-        tar -xjf OpenWrt-SDK-*.tar.bz2
-        cd OpenWrt-SDK-15.05.1-ramips-mt7621_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64
-        export STAGING_DIR=$(pwd)/staging_dir/toolchain-mipsel_1004kc+dsp_gcc-4.8-linaro_uClibc-0.9.33.2
-        export TOOLCHAIN=$(pwd)/staging_dir/toolchain-mipsel_1004kc+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin
+        wget -q https://archive.openwrt.org/releases/25.12.0/targets/ramips/mt7621/openwrt-toolchain-25.12.0-ramips-mt7621_gcc-14.3.0_musl.Linux-x86_64.tar.zst
+        tar -I zstd -xf openwrt-*.tar.zst
+        cd openwrt-toolchain-25.12.0-ramips-mt7621_gcc-14.3.0_musl.Linux-x86_64
+        export TOOLCHAIN=$(pwd)/bin
         export PATH=$TOOLCHAIN:$PATH
         cd ..
-        make CC=mipsel-openwrt-linux-gcc LDFLAGS="-lcurl -lcjson -lz"
+        git clone https://github.com/DaveGamble/cJSON.git
+        cd cJSON && make CC=mipsel-openwrt-linux-gcc && cd ..
+        git clone -b curl-7_68_0 https://github.com/curl/curl.git
+        cd curl && autoreconf -fi
+        ./configure --disable-shared --enable-static --without-ssl --without-libpsl --without-librtmp --without-zstd --without-brotli
+        cd ..
+        make CC=mipsel-openwrt-linux-gcc LDFLAGS="-lcurl cJSON/libcjson.a -lz" CFLAGS="-IcJSON -Icurl/include"
+        ./nbtv --version 
     - uses: actions/upload-artifact@v4
       with:
         name: linux-x64-${{ matrix.targets[0] }}
         path: nbtv
-        
