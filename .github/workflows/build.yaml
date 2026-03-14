@@ -2,95 +2,94 @@ name: Build Release Binaries
 
 on:
   push:
-      tags:
-            - 'v*'
-              workflow_dispatch:
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
-              permissions:
-                contents: write
+permissions:
+  contents: write
 
-                jobs:
-                  build-windows:
-                      runs-on: windows-latest
-                          steps:
-                              - uses: actions/checkout@v4
-                                  - name: Install dependencies
-                                        run: |
-                                                choco install msys2 -y
-                                                        C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
-                                                                C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-toolchain
-                                                                        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-curl
-                                                                                C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-cjson
-                                                                                        echo "C:\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-                                                                                            - name: Build
-                                                                                                  run: |
-                                                                                                          make
-                                                                                                                  .\nbtv.exe --version
-                                                                                                                      - uses: actions/upload-artifact@v4
-                                                                                                                            with:
-                                                                                                                                    name: windows-x64
-                                                                                                                                            path: nbtv.exe
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install dependencies
+      run: |
+        choco install msys2 -y
+        C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
+        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-toolchain
+        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-curl
+        C:\msys64\usr\bin\pacman.exe -S --noconfirm mingw-w64-x86_64-cjson
+        echo "C:\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+    - name: Build
+      run: |
+        make
+        .\nbtv.exe --version
+    - uses: actions/upload-artifact@v4
+      with:
+        name: windows-x64
+        path: nbtv.exe
 
-                                                                                                                                              build-linux:
-                                                                                                                                                  runs-on: ubuntu-latest
-                                                                                                                                                      steps:
-                                                                                                                                                          - uses: actions/checkout@v4
-                                                                                                                                                              - name: Install dependencies
-                                                                                                                                                                    run: |
-                                                                                                                                                                            sudo apt-get update
-                                                                                                                                                                                    sudo apt-get install -y gcc libcurl4-openssl-dev libcjson-dev
-                                                                                                                                                                                        - name: Build
-                                                                                                                                                                                              run: |
-                                                                                                                                                                                                      make
-                                                                                                                                                                                                              ./nbtv --version
-                                                                                                                                                                                                                  - uses: actions/upload-artifact@v4
-                                                                                                                                                                                                                        with:
-                                                                                                                                                                                                                                name: linux-x64
-                                                                                                                                                                                                                                        path: nbtv
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc libcurl4-openssl-dev libcjson-dev
+    - name: Build
+      run: |
+        make
+        ./nbtv --version
+    - uses: actions/upload-artifact@v4
+      with:
+        name: linux-x64
+        path: nbtv
 
-                                                                                                                                                                                                                                          build-linux-arm:
-                                                                                                                                                                                                                                              runs-on: ubuntu-latest
-                                                                                                                                                                                                                                                  steps:
-                                                                                                                                                                                                                                                      - uses: actions/checkout@v4
-                                                                                                                                                                                                                                                          - name: Install ARM cross tools and libraries
-                                                                                                                                                                                                                                                                run: |
-                                                                                                                                                                                                                                                                        sudo dpkg --add-architecture arm64
-                                                                                                                                                                                                                                                                                sudo dpkg --add-architecture armhf
-                                                                                                                                                                                                                                                                                        sudo apt-get update
-                                                                                                                                                                                                                                                                                                sudo apt-get install -y gcc-aarch64-linux-gnu gcc-arm-linux-gnueabihf
-                                                                                                                                                                                                                                                                                                        sudo apt-get install -y libcurl4-openssl-dev:arm64 libcjson-dev:arm64
-                                                                                                                                                                                                                                                                                                                sudo apt-get install -y libcurl4-openssl-dev:armhf libcjson-dev:armhf
-                                                                                                                                                                                                                                                                                                                    - name: Build ARM64
-                                                                                                                                                                                                                                                                                                                          run: |
-                                                                                                                                                                                                                                                                                                                                  make CC=aarch64-linux-gnu-gcc CFLAGS="$(pkg-config --cflags libcurl cjson)" LDFLAGS="$(pkg-config --libs libcurl cjson)"
-                                                                                                                                                                                                                                                                                                                                          mv nbtv nbtv-arm64
-                                                                                                                                                                                                                                                                                                                                              - name: Build ARM32
-                                                                                                                                                                                                                                                                                                                                                    run: |
-                                                                                                                                                                                                                                                                                                                                                            make clean
-                                                                                                                                                                                                                                                                                                                                                                    make CC=arm-linux-gnueabihf-gcc CFLAGS="$(pkg-config --cflags libcurl cjson)" LDFLAGS="$(pkg-config --libs libcurl cjson)"
-                                                                                                                                                                                                                                                                                                                                                                            mv nbtv nbtv-arm32
-                                                                                                                                                                                                                                                                                                                                                                                - uses: actions/upload-artifact@v4
-                                                                                                                                                                                                                                                                                                                                                                                      with:
-                                                                                                                                                                                                                                                                                                                                                                                              name: linux-arm
-                                                                                                                                                                                                                                                                                                                                                                                                      path: |
-                                                                                                                                                                                                                                                                                                                                                                                                                nbtv-arm32
-                                                                                                                                                                                                                                                                                                                                                                                                                          nbtv-arm64
+  build-linux-arm:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install ARM cross tools and libraries
+      run: |
+        sudo dpkg --add-architecture arm64
+        sudo dpkg --add-architecture armhf
+        sudo apt-get update
+        sudo apt-get install -y gcc-aarch64-linux-gnu gcc-arm-linux-gnueabihf
+        sudo apt-get install -y libcurl4-openssl-dev:arm64 libcjson-dev:arm64
+        sudo apt-get install -y libcurl4-openssl-dev:armhf libcjson-dev:armhf
+    - name: Build ARM64
+      run: |
+        make CC=aarch64-linux-gnu-gcc CFLAGS="$(pkg-config --cflags libcurl cjson)" LDFLAGS="$(pkg-config --libs libcurl cjson)"
+        mv nbtv nbtv-arm64
+    - name: Build ARM32
+      run: |
+        make clean
+        make CC=arm-linux-gnueabihf-gcc CFLAGS="$(pkg-config --cflags libcurl cjson)" LDFLAGS="$(pkg-config --libs libcurl cjson)"
+        mv nbtv nbtv-arm32
+    - uses: actions/upload-artifact@v4
+      with:
+        name: linux-arm
+        path: |
+          nbtv-arm32
+          nbtv-arm64
 
-                                                                                                                                                                                                                                                                                                                                                                                                                            release:
-                                                                                                                                                                                                                                                                                                                                                                                                                                needs: [build-windows, build-linux, build-linux-arm]
-                                                                                                                                                                                                                                                                                                                                                                                                                                    runs-on: ubuntu-latest
-                                                                                                                                                                                                                                                                                                                                                                                                                                        steps:
-                                                                                                                                                                                                                                                                                                                                                                                                                                            - uses: actions/download-artifact@v4
-                                                                                                                                                                                                                                                                                                                                                                                                                                                  with:
-                                                                                                                                                                                                                                                                                                                                                                                                                                                          path: dist
-                                                                                                                                                                                                                                                                                                                                                                                                                                                              - name: Create release
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    uses: softprops/action-gh-release@v2
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                          with:
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  files: |
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            dist/windows-x64/nbtv.exe
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      dist/linux-x64/nbtv
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                dist/linux-arm/nbtv-arm32
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          dist/linux-arm/nbtv-arm64
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                env:
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+  release:
+    needs: [build-windows, build-linux, build-linux-arm]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        path: dist
+    - name: Create release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          dist/windows-x64/nbtv.exe
+          dist/linux-x64/nbtv
+          dist/linux-arm/nbtv-arm32
+          dist/linux-arm/nbtv-arm64
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
