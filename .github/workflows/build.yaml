@@ -41,7 +41,7 @@ jobs:
         cd curl && autoreconf -fi
         ./configure --disable-shared --disable-xattr --enable-static --without-ssl --without-libpsl --without-librtmp --without-zstd --without-brotli
         cd ..
-        make CC=mipsel-openwrt-linux-gcc LDFLAGS="-curl cJSON/libcjson.a -lz" CFLAGS="-IcJSON -Icurl/include"
+        make CC=mipsel-openwrt-linux-gcc LDFLAGS="-lcurl cJSON/libcjson.a -lz" CFLAGS="-IcJSON -Icurl/include"
         ./nbtv --version 
     - uses: actions/upload-artifact@v4
       with:
