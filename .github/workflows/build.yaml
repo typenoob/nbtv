@@ -29,7 +29,7 @@ jobs:
         sudo apt-get install -y gcc libcurl4-openssl-dev libcjson-dev
     - name: Build (Static)
       run: |
-        make LDFLAGS="-static" CFLAGS="-static"
+        make LDFLAGS="-static -lcurl -lcjson" CFLAGS="-static"
         ./nbtv --version 
     - uses: actions/upload-artifact@v4
       with:
