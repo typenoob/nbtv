@@ -32,7 +32,11 @@ jobs:
         sudo apt-get install -y gcc libcurl4-openssl-dev
         git clone https://github.com/DaveGamble/cJSON.git
         cd cJSON && make && cd ..
-        make LDFLAGS="-Wl,-Bstatic -lcurl cJSON/libcjson.a -Wl,-Bdynamic" CFLAGS="-IcJSON"
+        git clone https://github.com/curl/curl.git
+        cd curl && autoreconf -fi
+        ./configure --disable-shared --enable-static --without-ssl
+        make -j$(nproc) && cd ..
+        make LDFLAGS="-static curl/lib/.libs/libcurl.a cJSON/libcjson.a" CFLAGS="-IcJSON -Icurl/include-static"
         ./nbtv --version 
     - uses: actions/upload-artifact@v4
       with:
