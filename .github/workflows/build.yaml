@@ -49,40 +49,21 @@ jobs:
         path: nbtv
 
   build-linux-arm:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
     - uses: actions/checkout@v4
-    - name: Add ARM arch and install cross tools
+    - name: Install dependencies
       run: |
-        sudo dpkg --add-architecture arm64
-        sudo dpkg --add-architecture armhf
         sudo apt-get update
-        sudo apt-get install -y \
-          gcc-aarch64-linux-gnu \
-          gcc-arm-linux-gnueabihf \
-          libcurl4-openssl-dev:arm64 \
-          libcjson-dev:arm64 \
-          libcurl4-openssl-dev:armhf \
-          libcjson-dev:armhf
-    - name: Build ARM64
+        sudo apt-get install -y gcc libcurl4-openssl-dev libcjson-dev
+    - name: Build
       run: |
-        make CC=aarch64-linux-gnu-gcc \
-          CFLAGS="-I/usr/include/aarch64-linux-gnu" \
-          LDFLAGS="-L/usr/lib/aarch64-linux-gnu -lcurl -lcjson"
-        mv nbtv nbtv-arm64
-    - name: Build ARM32
-      run: |
-        make clean
-        make CC=arm-linux-gnueabihf-gcc \
-          CFLAGS="-I/usr/include/arm-linux-gnueabihf" \
-          LDFLAGS="-L/usr/lib/arm-linux-gnueabihf -lcurl -lcjson"
-        mv nbtv nbtv-arm32
+        make
+        ./nbtv --version
     - uses: actions/upload-artifact@v4
       with:
         name: linux-arm
-        path: |
-          nbtv-arm32
-          nbtv-arm64
+        path: nbtv
 
   release:
     needs: [build-windows, build-linux, build-linux-arm]
@@ -100,5 +81,4 @@ jobs:
         files: |
           dist/windows-x64/nbtv.exe
           dist/linux-x64/nbtv
-          dist/linux-arm/nbtv-arm32
-          dist/linux-arm/nbtv-arm64
+          dist/linux-arm/nbtv
