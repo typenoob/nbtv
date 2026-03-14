@@ -31,8 +31,8 @@ jobs:
       run: |
         sudo apt-get install -y gcc libcurl4-openssl-dev
         git clone https://github.com/DaveGamble/cJSON.git
-        cd cJSON && make && sudo make install && cd ..
-        make LDFLAGS="-static -lcurl -lcjson" CFLAGS="-static"
+        cd cJSON && make && cd ..
+        make LDFLAGS="-static -lcurl cJSON/libcjson.a" CFLAGS="-static -IcJSON"
         ./nbtv --version 
     - uses: actions/upload-artifact@v4
       with:
