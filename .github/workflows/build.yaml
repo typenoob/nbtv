@@ -35,7 +35,7 @@ jobs:
         cd curl && autoreconf -fi
         ./configure --disable-shared --enable-static --without-ssl --without-libpsl --without-librtmp --without-zstd --without-brotli
         make CC=mipsel-linux-gnu-gcc -j$(nproc) && cd ..
-        make CC=mipsel-linux-gnu-gcc LDFLAGS="-static curl/lib/.libs/libcurl.a cJSON/libcjson.a -lz" CFLAGS="-IcJSON -Icurl/include-static"
+        make CC=mipsel-linux-gnu-gcc LDFLAGS="-lcurl -lcjson -lz" CFLAGS="-IcJSON -Icurl/include-static"
         ./nbtv --version 
     - uses: actions/upload-artifact@v4
       with:
