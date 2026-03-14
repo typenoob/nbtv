@@ -40,7 +40,7 @@ jobs:
         cd cJSON && make CC=mipsel-openwrt-linux-gcc && cd ..
         git clone -b curl-7_68_0 https://github.com/curl/curl.git
         cd curl && autoreconf -fi
-        ./configure --disable-shared --enable-static --without-ssl --without-libpsl --without-librtmp --without-zstd --without-brotli
+        ./configure --disable-shared --disable-xattr --enable-static --without-ssl --without-libpsl --without-librtmp --without-zstd --without-brotli
         make CC=mipsel-openwrt-linux-gcc -j$(nproc) && cd ..
         make CC=mipsel-openwrt-linux-gcc LDFLAGS="-static curl/lib/.libs/libcurl.a cJSON/libcjson.a -lz" CFLAGS="-IcJSON -Icurl/include-static"
         ./nbtv --version 
