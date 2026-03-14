@@ -42,7 +42,7 @@ jobs:
         git clone https://github.com/curl/curl.git
         cd curl && autoreconf -fi
         ./configure --disable-shared --enable-static --without-ssl --without-libpsl --without-librtmp --without-zstd --without-brotli --without-zlib
-        make CC=mipsel-openwrt-linux-gcc -j$(nproc) && cd ..
+        make CC=mipsel-openwrt-linux-gcc CFLAGS="-DHAVE_ARC4RANDOM=0" -j$(nproc) && cd ..
         make CC=mipsel-openwrt-linux-gcc LDFLAGS="curl/lib/.libs/libcurl.a cjson/libcjson.a" CFLAGS="-I. -Icurl/include"
         ./nbtv --version 
     - uses: actions/upload-artifact@v4
