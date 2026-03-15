@@ -37,6 +37,7 @@ jobs:
         export PATH=$TOOLCHAIN:$PATH
         ./scripts/feeds update -a
         ./scripts/feeds install libcurl
+        find -name curl.h
         cd ..
         git clone https://github.com/DaveGamble/cJSON.git
         mv cJSON cjson
