@@ -35,16 +35,12 @@ jobs:
         export TOOLCHAIN=$(pwd)/staging_dir/toolchain-mipsel_24kc_gcc-14.3.0_musl/bin
         export STAGING_DIR=$(pwd)/staging_dir
         export PATH=$TOOLCHAIN:$PATH
+        ./scripts/feeds update -a
+        ./scripts/feeds install libcurl
         cd ..
         git clone https://github.com/DaveGamble/cJSON.git
         mv cJSON cjson
         cd cjson && make CC=mipsel-openwrt-linux-gcc && cd ..
-        git clone https://github.com/guillemj/libbsd
-        cd libbsd && ./configure --host=mipsel-openwrt-linux --prefix=$STAGING_DIR/target-mipsel_24kc_musl/usr
-        make CC=mipsel-openwrt-linux-gcc && make CC=mipsel-openwrt-linux-gcc install && cd ..
-        git clone https://github.com/curl/curl.git
-        cd curl && autoreconf -fi
-        ./configure --disable-shared --enable-static --without-ssl --without-libpsl --without-librtmp --without-zstd --without-brotli --without-zlib
         make CC=mipsel-openwrt-linux-gcc -j$(nproc) && cd ..
         make CC=mipsel-openwrt-linux-gcc LDFLAGS="-static curl/lib/.libs/libcurl.a cjson/libcjson.a" CFLAGS="-I. -Icurl/include"
         ./nbtv --version 
