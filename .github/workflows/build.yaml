@@ -42,7 +42,7 @@ jobs:
         mv cJSON cjson
         cd cjson && make CC=mipsel-openwrt-linux-gcc && cd ..
         make CC=mipsel-openwrt-linux-gcc -j$(nproc) && cd ..
-        make CC=mipsel-openwrt-linux-gcc LDFLAGS="-static curl/lib/.libs/libcurl.a cjson/libcjson.a" CFLAGS="-I. -Icurl/include"
+        make CC=mipsel-openwrt-linux-gcc LDFLAGS="-static -lcurl cjson/libcjson.a" CFLAGS="-I."
         ./nbtv --version 
     - uses: actions/upload-artifact@v4
       with:
