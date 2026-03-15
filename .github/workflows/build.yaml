@@ -42,8 +42,8 @@ jobs:
         git clone https://github.com/DaveGamble/cJSON.git
         mv cJSON cjson
         cd cjson && make CC=mipsel-openwrt-linux-gcc && cd ..
-        make CC=mipsel-openwrt-linux-gcc -j$(nproc) && cd ..
-        make CC=mipsel-openwrt-linux-gcc LDFLAGS="-static -lcurl cjson/libcjson.a" CFLAGS="-I."
+        git clone https://github.com/curl/curl.git
+        make CC=mipsel-openwrt-linux-gcc LDFLAGS="-static -lcurl cjson/libcjson.a" CFLAGS="-I. -Icurl/include"
         ./nbtv --version 
     - uses: actions/upload-artifact@v4
       with:
