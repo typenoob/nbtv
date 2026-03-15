@@ -39,6 +39,9 @@ jobs:
         git clone https://github.com/DaveGamble/cJSON.git
         mv cJSON cjson
         cd cjson && make CC=mipsel-openwrt-linux-gcc && cd ..
+        git clone https://github.com/guillemj/libbsd
+        cd libbsd && ./configure --host=mipsel-openwrt-linux --prefix=$STAGING_DIR/target-mipsel_24kc_musl/usr
+        make CC=mipsel-openwrt-linux-gcc && make CC=mipsel-openwrt-linux-gcc install && cd ..
         git clone https://github.com/curl/curl.git
         cd curl && autoreconf -fi
         ./configure --disable-shared --enable-static --without-ssl --without-libpsl --without-librtmp --without-zstd --without-brotli --without-zlib
