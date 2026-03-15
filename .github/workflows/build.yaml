@@ -29,11 +29,11 @@ jobs:
         sudo apt-get install -y gcc zlib1g-dev libcurl4-openssl-dev libcjson-dev
     - name: Build (Static)
       run: |
-        wget -q https://archive.openwrt.org/releases/25.12.0/targets/ramips/mt7621/openwrt-toolchain-25.12.0-ramips-mt7621_gcc-14.3.0_musl.Linux-x86_64.tar.zst
-        tar -I zstd -xf openwrt-*.tar.zst
-        cd openwrt-toolchain-25.12.0-ramips-mt7621_gcc-14.3.0_musl.Linux-x86_64
-        export TOOLCHAIN=$(pwd)/toolchain-mipsel_24kc_gcc-14.3.0_musl/bin
-        export STAGING_DIR=$(pwd)/toolchain-mipsel_24kc_gcc-14.3.0_musl
+        wget -q https://archive.openwrt.org/releases/25.12.0/targets/ramips/mt7621/openwrt-sdk-25.12.0-ramips-mt7621_gcc-14.3.0_musl.Linux-x86_64.tar.zst
+        tar -xf openwrt-*.tar.zst
+        cd openwrt-sdk-25.12.0-ramips-mt7621_gcc-14.3.0_musl.Linux-x86_64
+        export TOOLCHAIN=$(pwd)/staging_dir/toolchain-mipsel_24kc_gcc-14.3.0_musl/bin
+        export STAGING_DIR=$(pwd)/staging_dir
         export PATH=$TOOLCHAIN:$PATH
         cd ..
         git clone https://github.com/DaveGamble/cJSON.git
