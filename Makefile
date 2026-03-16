@@ -1,11 +1,10 @@
 include $(TOPDIR)/rules.mk
+include $(INCLUDE_DIR)/package.mk
 
 PKG_NAME:=nbtv
 PKG_VERSION:=1.0
 PKG_RELEASE:=1
 PKG_LICENSE:=MIT
-
-include $(INCLUDE_DIR)/package.mk
 
 define Package/nbtv
         SECTION:=utils
