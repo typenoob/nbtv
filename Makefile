@@ -8,26 +8,27 @@ PKG_LICENSE:=MIT
 include $(INCLUDE_DIR)/package.mk
 
 define Package/nbtv
-	SECTION:=utils
-	CATEGORY:=Utilities
-	DEPENDS:=+libcurl
-	TITLE:=NBTV M3U8 Live Source Publish Server
-	MAINTAINER:=yuaochen <chenyutao0706@gmail.com>
+        SECTION:=utils
+        CATEGORY:=Utilities
+        DEPENDS:=+libcurl
+        TITLE:=NBTV M3U8 Live Source Publish Server
+        MAINTAINER:=yuaochen <chenyutao0706@gmail.com>
 endef
 
 define Package/nbtv/description
-	NBTV M3U8 Live Source Publish Server
+        NBTV M3U8 Live Source Publish Server
 endef
 
 # 关键：不定义 PKG_SOURCE，只复制本地文件
 define Build/Prepare
-	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) ./nbtv/* $(PKG_BUILD_DIR)/
+        mkdir -p $(PKG_BUILD_DIR)
+        $(CP) -r ./nbtv $(PKG_BUILD_DIR)/
+        $(CP) -r ./libs $(PKG_BUILD_DIR)/
 endef
 
 # 编译
 define Build/Compile
-	$(MAKE) -C $(PKG_BUILD_DIR) \
+        $(MAKE) -C $(PKG_BUILD_DIR)/nbtv \
         CC="$(TARGET_CC)" \
         CFLAGS="$(TARGET_CFLAGS) -I$(PKG_BUILD_DIR)" \
         LDFLAGS="$(TARGET_LDFLAGS) -lcurl"
@@ -35,8 +36,8 @@ endef
 
 # 安装
 define Package/nbtv/install
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/nbtv $(1)/usr/bin/
+        $(INSTALL_DIR) $(1)/usr/bin
+        $(INSTALL_BIN) $(PKG_BUILD_DIR)/nbtv/nbtv $(1)/usr/bin/
 endef
 
 $(eval $(call BuildPackage,nbtv))
