@@ -1,53 +1,42 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=hello-local
+PKG_NAME:=nbtv
 PKG_VERSION:=1.0
 PKG_RELEASE:=1
 PKG_LICENSE:=MIT
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/hello-local
-  SECTION:=utils
-  CATEGORY:=Utilities
-  TITLE:=Hello from local source
-  MAINTAINER:=Your Name <your@email.com>
+define Package/nbtv
+	SECTION:=utils
+	CATEGORY:=Utilities
+	DEPENDS:=+libcurl
+	TITLE:=NBTV M3U8 Live Source Publish Server
+	MAINTAINER:=yuaochen <chenyutao0706@gmail.com>
 endef
 
-define Package/hello-local/description
-  A simple hello world program built from local source.
+define Package/nbtv/description
+	NBTV M3U8 Live Source Publish Server
 endef
 
 # 关键：不定义 PKG_SOURCE，只复制本地文件
 define Build/Prepare
-    mkdir -p $(PKG_BUILD_DIR)
-    $(CP) ./src/* $(PKG_BUILD_DIR)/
-endef
-
-# 如果需要配置步骤
-define Build/Configure
-    # 如果有 configure 脚本
-    (cd $(PKG_BUILD_DIR) && ./configure \
-        --host=$(GNU_TARGET_NAME) \
-        --prefix=/usr)
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./nbtv/* $(PKG_BUILD_DIR)/
 endef
 
 # 编译
 define Build/Compile
-    $(MAKE) -C $(PKG_BUILD_DIR) \
+	$(MAKE) -C $(PKG_BUILD_DIR) \
         CC="$(TARGET_CC)" \
-        CFLAGS="$(TARGET_CFLAGS)" \
-        LDFLAGS="$(TARGET_LDFLAGS)"
+        CFLAGS="$(TARGET_CFLAGS) -I$(PKG_BUILD_DIR)" \
+        LDFLAGS="$(TARGET_LDFLAGS) -lcurl"
 endef
 
 # 安装
-define Package/hello-local/install
-    $(INSTALL_DIR) $(1)/usr/bin
-    $(INSTALL_BIN) $(PKG_BUILD_DIR)/hello $(1)/usr/bin/
-    
-    # 安装配置文件（如果有）
-    $(INSTALL_DIR) $(1)/etc/config
-    $(INSTALL_CONF) ./files/hello.conf $(1)/etc/config/hello
+define Package/nbtv/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/nbtv $(1)/usr/bin/
 endef
 
-$(eval $(call BuildPackage,hello-local))
+$(eval $(call BuildPackage,nbtv))

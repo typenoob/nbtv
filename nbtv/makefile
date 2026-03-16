@@ -4,9 +4,9 @@
 CC = gcc
 
 # 编译选项
-CFLAGS = -Wall -Wextra -O2
-BASE_LDFLAGS = -lcurl -lcjson
-LDLIBS += -lcurl -lcjson
+CFLAGS = -Wall -Wextra -O2 -I..
+BASE_LDFLAGS = -lcurl
+LDLIBS += -lcurl
 
 # Windows平台
 ifeq ($(OS), Windows_NT)
@@ -38,7 +38,7 @@ endef
 endif
 
 # 源文件
-SRC = main.c
+SRC = $(wildcard *.c) ../libs/cjson/cJSON.c
 OBJ = $(SRC:.c=.o)
 
 # 默认目标
@@ -50,6 +50,7 @@ $(TARGET): $(OBJ)
 
 # 编译源文件
 %.o: %.c
+	@mkdir -p $(@D)  # 创建目标目录
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # 清理
