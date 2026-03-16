@@ -1,4 +1,4 @@
-宁波电视台IPTV代理服务器
+宁波电视台IPTV直播源发布服务器
 
 To build for PC
 1. `apt update && apt install libcurl4-openssl-dev`
