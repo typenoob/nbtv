@@ -30,7 +30,7 @@ jobs:
       - name: Build
         uses: openwrt/gh-action-sdk@main
         env:
-          ARCH: ${{ matrix.arch }}
+          ARCH: ${{ matrix.arch }}-openwrt-22.03
           FEEDNAME: packages_ci
           PACKAGES: nbtv
           NO_REFRESH_CHECK: true
@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.arch }}
-          path: bin/packages/${{ matrix.arch }}/packages_ci/*.apk
+          path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
 
       - name: Upload packages
         uses: ncipollo/release-action@v1
@@ -47,4 +47,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           replacesArtifacts: true
-          artifacts: "bin/packages/${{ matrix.arch }}/packages_ci/*.apk"
+          artifacts: "bin/packages/${{ matrix.arch }}/packages_ci/*.ipk"
