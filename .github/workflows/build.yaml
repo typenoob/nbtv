@@ -18,6 +18,7 @@ jobs:
         arch:
           - x86_64
           - mipsel_24kc
+          - aarch64_cortex-a53
 
     steps:
       - uses: actions/checkout@v4
