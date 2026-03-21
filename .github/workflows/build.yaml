@@ -32,7 +32,7 @@ jobs:
       - name: Build
         uses: openwrt/gh-action-sdk@main
         env:
-          ARCH: ${{ matrix.arch }}-openwrt-22.03
+          ARCH: ${{ matrix.arch }}-openwrt-21.02
           FEEDNAME: packages_ci
           PACKAGES: nbtv
           NO_REFRESH_CHECK: true
