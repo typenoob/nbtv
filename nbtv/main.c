@@ -18,6 +18,9 @@
 #include <arpa/inet.h>
 #endif
 
+// 强制禁用 64 位时间符号，强制使用旧版 32 位接口
+#define _TIME_BITS=32
+
 // 定义频道数量
 #define CHANNEL_COUNT 4
 #define SERVER_PORT 8787
